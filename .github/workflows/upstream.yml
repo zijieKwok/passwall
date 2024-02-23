@@ -84,7 +84,7 @@ jobs:
         rm -rf $1
         }
         (
-        git clone --depth=1 https://github.com/kiddin9/openwrt-packages.git ./pass
+        git_clone https://github.com/kiddin9/openwrt-packages ./pass
         mv ./pass/luci-app-bypass ./
         rm -rf ./pass
         git_clone https://github.com/xiaorouji/openwrt-passwall && mvdir openwrt-passwall
