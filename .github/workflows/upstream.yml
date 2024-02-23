@@ -1,180 +1,154 @@
+name: update.passwall
 
-name: Merge-upstream
-on:
-  push:
-    paths:
-      - '.github/workflows/upstream.yml'
-      - '.gitignore'
-      - '.github/diy/luci-app-passwall.patch'
-  schedule:
-    - cron: 0 */12 * * *
-  workflow_dispatch:
-    inputs:
-      ssh:
-        description: 'ssh'
-        required: false
-        default: 'true'
-  watch:
-    types: started
+on: 
   repository_dispatch:
+  workflow_dispatch:
+
+# 定时触发编译
+  schedule:
+    - cron: 0 */1 * * *
+
+# 点赞☆Star触发编译
+#  watch:
+#    types: [started]
 
 jobs:
-  merge:
-    if: github.event.repository.owner.id == github.event.sender.id || ! github.event.sender.id || github.event.sender.id == '119362912'
-    runs-on: Ubuntu-22.04
-
+  Update:
+    runs-on: ubuntu-20.04
     steps:
-    - name: Checkout
-      uses: actions/checkout@main
-      with:
-        fetch-depth: 0
+    - name: Clone Repository
+      uses: actions/checkout@v3
 
-    - uses: de-vri-es/setup-git-credentials@v2
-      with:
-        credentials: https://zijieKwok:${{ secrets.GITHUB_TOKEN }}@github.com/
-    
-    - name: Set git identity
+    - name: Set git
       run : |
         git config --global user.email "109743406+zijieKwok@users.noreply.github.com"
-        git config --global user.name "github-actions[bot]"
+        git config --global user.name "zijieKwok"
         sudo timedatectl set-timezone "Asia/Shanghai"
 
-    - name: Syn upstream
+    - name: Delete workflow runs
+      uses: Mattraks/delete-workflow-runs@main
+      continue-on-error: true
+      with:
+        retain_days: 1
+        keep_minimum_runs: 0  
+        
+    - name: Update
       run: |
-        shopt -s extglob
-        set +e
-        git rm -r --cache * >/dev/null 2>&1 &
-        rm -rf `find ./* -maxdepth 0 -type d ! -name ".github/diy"` >/dev/null 2>&1
-        function git_clone() {
-          git clone --depth 1 $1 $2
-          if [ "$?" != 0 ]; then
-            echo "error on $1"
-            pid="$( ps -q $$ )"
-            kill $pid
-          fi
-        }
-        function git_sparse_clone() {
-          branch="$1" rurl="$2" localdir="$3" && shift 3
-          git clone -b $branch --depth 1 --filter=blob:none --sparse $rurl $localdir
-          if [ "$?" != 0 ]; then
-            echo "error on $rurl"
-            pid="$( ps -q $$ )"
-            kill $pid
-          fi
-          cd $localdir
-          git sparse-checkout init --cone
-          git sparse-checkout set $@
-          mv -n $@ ../ || true
-          cd ..
-          rm -rf $localdir
-          }
-        function git_sparse_clone2() {
-          commitid="$1" rurl="$2" localdir="$3" && shift 3
-          git clone --filter=blob:none --sparse $rurl $localdir
-          cd $localdir
-          git checkout $commitid
-          git sparse-checkout init --cone
-          git sparse-checkout set $@
-          mv -n $@ ../ || true
-          cd ..
-          rm -rf $localdir
-          }
-        function mvdir() {
-        mv -n `find $1/* -maxdepth 0 -type d` ./
-        rm -rf $1
-        }
-        (
-        git_clone https://github.com/kiddin9/openwrt-packages ./pass
-        mv ./pass/luci-app-bypass ./
+
+        rm -rf ./*
+        rm -rf ./luci-app-bypass
+        rm -rf ./luci-app-passwall
+        rm -rf ./passwall-packages
+        rm -rf ./lua-maxminddb
+        # rm -rf ./luci-app-openclash
+        # rm -rf ./luci-app-passwall2
+        # rm -rf ./luci-app-ssr-plus
+        # rm -rf ./
+        # rm -rf ./luci-app-oled
+        # rm -rf ./go-aliyundrive/*
+        
+         
+        # git clone --depth=1 https://github.com/kiddin9/openwrt-packages.git ./pass
+        # rm -rf ./luci-app-pushbo/README.md
+        # git clone https://github.com/tty228/luci-app-wechatpush ./luci-app-wechatpush
+        # rm -rf ./luci-app-wechatpush/README.md
+        # rm -rf ./luci-app-wechatpush/README_en.md
+        # git clone https://github.com/stevenke1981/luci-app-easymesh ./luci-app-easymesh
+        # rm -rf ./luci-app-easymesh/README.md
+        # git clone https://github.com/ilxp/luci-app-ikoolproxy ./luci-app-ikoolproxy
+        # rm -rf ./luci-app-ikoolproxy/.github
+        # rm -rf ./luci-app-ikoolproxy/change.log
+        # rm -rf ./luci-app-ikoolproxy/development.doc
+        # rm -rf ./luci-app-ikoolproxy/README.md
+        # git clone https://github.com/linkease/nas-packages ./linkease/nas-packages
+        # mv ./linkease/nas-packages/multimedia/ffmpeg-remux ./linkease/nas-packages/
+        # mv ./linkease/nas-packages/network/services/* ./linkease/nas-packages/
+        # rm -rf ./linkease/nas-packages/multimedia
+        # rm -rf ./linkease/nas-packages/network
+        # rm -rf ./linkease/nas-packages/.git
+        # rm -rf ./linkease/nas-packages/README.md
+        
+        # git clone https://github.com/linkease/istore ./linkease/iStore
+        # mv ./linkease/iStore/luci/*  ./linkease/luci/
+        # rm -rf ./linkease/iStore
+
+        # git clone https://github.com/linkease/istore-ui ./linkease/istore-ui
+        # mv ./linkease/istore-ui/app-store-ui ./linkease/luci/
+        # rm -rf ./linkease/istore-ui  
+
+        git clone --depth=1 https://github.com/kiddin9/openwrt-packages.git ./maxminddb
+        mv ./maxminddb/lua-maxminddb ./ 
+        rm -rf ./maxminddb
+       
+        git clone --depth=1 https://github.com/kiddin9/openwrt-packages.git ./pass3
+        mv ./pass3/luci-app-bypass ./
+        rm -rf ./pass3
+        
+
+
+        git clone https://github.com/xiaorouji/openwrt-passwall-packages ./passwall-packages
+        mv ./passwall-packages/* ./
+        rm -rf ./passwall-packages
+          
+
+        # git clone https://github.com/fw876/helloworld ./helloworld
+        # mv ./helloworld/luci-app-ssr-plus ./
+        # rm -rf ./helloworld
+        
+        git clone --depth=1 https://github.com/kiddin9/openwrt-packages.git ./pass
+        # git clone https://github.com/xiaorouji/openwrt-passwall2 ./pass2
+        mv ./pass/luci-app-passwall ./
+        # mv ./pass2/luci-app-passwall2 ./
         rm -rf ./pass
-        git_clone https://github.com/xiaorouji/openwrt-passwall && mvdir openwrt-passwall
-        ) &
+        # rm -rf ./pass2
+
+        # git clone --depth=1 https://github.com/vernesong/OpenClash.git -b dev
+        # mv ./OpenClash/luci-app-openclash ./
+        # rm -rf ./OpenClash
+
+        # git clone https://github.com/jerrykuku/lua-maxminddb/ ./mosdns
+        # git clone https://github.com/sbwml/v2ray-geodata ./mosdns/v2ray-geodata
+        # rm -rf ./mosdns/install.sh
+        # rm -rf ./mosdns/.github
+        # rm -rf ./mosdns/README.md
+        # git clone https://github.com/sbwml/openwrt-alist ./alist/
+        # rm -rf ./alist/.github
+        # rm -rf ./alist/README.md
+        # rm -rf ./alist/install.sh
+        # git clone https://github.com/UnblockNeteaseMusic/luci-app-unblockneteasemusic ./luci-app-unblockneteasemusic/
+        # rm -rf ./luci-app-unblockneteasemusic/.github
+        # rm -rf ./luci-app-unblockneteasemusic/README.md
+ 
+       
+        # git clone https://github.com/sirpdboy/luci-app-ddns-go ./ddnsgo/
+        # git clone https://github.com/sirpdboy/luci-app-lucky ./lucky/
+        # rm -rf ./lucky/README.md
+        # rm -rf ./ddnsgo/README.md
+
+       
+        # git clone https://github.com/pymumu/luci-app-smartdns -b lede ./luci-app-smartdns
+        # rm -rf ./luci-app-smartdns/.git
+
+
+        # git clone https://github.com/jerrykuku/luci-theme-argon ./theme/luci-theme-argon
+        # git clone https://github.com/jerrykuku/luci-theme-argon -b 18.06 ./theme/luci-theme-argon-18.06          
+        # rm -rf ./theme/luci-theme-argon/.github
+        # rm -rf ./theme/luci-theme-argon/.gitignore
+        # rm -rf ./theme/luci-theme-argon-18.06/.github
+        # rm -rf ./theme/luci-theme-argon-18.06/.gitignore       
+        # rm -rf ./theme/luci-theme-argon/README*
+        # rm -rf ./theme/luci-theme-argon/RELEASE*
+        # rm -rf ./theme/luci-theme-argon-18.06/README*
         
-
-    - name: SSH connection to Actions
-      uses: kiddin9/debugger-action@master
-      if: github.event.inputs.ssh == 'true'
-
-    - name: Apply patches
-      run: |
-        find ".github/diy/patches" -type f -name '*.patch' -print0 | sort -z | xargs -I % -t -0 -n 1 sh -c "cat '%'  | patch -d './' -p1 -E --forward --no-backup-if-mismatch" || (curl -k --data chat_id="${{ secrets.TELEGRAM_CHAT_ID }}" --data "text=❌ 软件包更新失败 😂 https://github.com/zijieKwok/JacKwok-passwall/actions" "https://api.telegram.org/bot${{ secrets.TELEGRAM_TOKEN }}/sendMessage";exit 1)
-
-    - name: Modify
-      run: |
-        shopt -s extglob
-        set +e
-        sed -i \
-        -e "s/\(network\..*\)\.ifname/\1.device/g" \
-        `find \( -path "*/root/*" -o -path "*/files/*" -o -path "*/luasrc/*" \) ! -path "./base-files/*" ! -path "./dnsmasq/*" ! -path "./luci-base/*" ! -path "./ppp/*" -type f` &
-        (
-        function latest() {
-          (curl -gs -H 'Content-Type: application/json' \
-             -H "Authorization: Bearer ${{ secrets.GITHUB_TOKEN }}" \
-             -X POST -d '{ "query": "query {repository(owner: \"'"$1"'\", name: \"'"$2"'\"){latestRelease{tagName tagCommit{oid}}refs(refPrefix:\"refs/tags/\",last:1,orderBy:{field:TAG_COMMIT_DATE,direction:ASC}){edges{node{name target{oid}}}}defaultBranchRef{target{...on Commit {oid}}}}}"}' https://api.github.com/graphql)
-        }
-        for pkg in $(ls !(luci-*|cloudflared|joker|aria2|frp|ddns-go|libtorrent-rasterbar|ua2f|homebox|xtables-wgobfs|nexttrace|tuic-server|subconverter|softethervpn5|shadowsocksr-libev|mt76|sub-web|mmdvm-host|alist|curl|qBittorrent-Enhanced-Edition|libwxwidgets|ysf-clients|natter|fullconenat|v2raya|r8152|amule|brook|3proxy|containerd|oscam|netmaker|n2n_v2|naiveproxy|miniupnpd-nft|upx|netdata|tailscale|mosdns|r8168|coremark|mbedtls|rtl8821cu|rtl8188eu|rtl8812au-ac|rtl88x2bu|rtl8189es|quickjspp|accel-ppp)/Makefile); do
-          repo="$(grep PKG_SOURCE_URL $pkg | grep github | cut -f 4-5 -d '/' | sed -e 's/.git//' | grep -E '[0-9a-zA-Z_-]+$')" || true
-          if [ "$repo" ]; then
-            owner="$(echo $repo | cut -f 1 -d '/')"
-            name="$(echo $repo | cut -f 2 -d '/')"
-            latest="$(latest $owner $name)"
-            sed -i "s/PKG_SOURCE_VERSION:=.*/PKG_SOURCE_VERSION:=$(echo $latest | jq -r '.data.repository.defaultBranchRef.target.oid')/" $pkg || true
-            over="$(grep -E PKG_VERSION:=.*$ $pkg | cut -f 2 -d '=' | sed -e 's/^\(v\|release-\)//' | grep -E "[0-9]")" || true
-            if [ "$over" ]; then
-              ver="$(echo $latest | jq -r '.data.repository.latestRelease.tagName' | sed -e 's/^\(v\|release-\)//' | grep -E "^[^()]*$" | grep -E "[0-9]")" || true
-              # [ "$ver" ] || ver="$(git ls-remote --tags git://github.com/$repo | cut -d/ -f3- | sort -t. -nk1,3 | awk '/^[^{]*$/{version=$1}END{print version}' | grep -o -E "[0-9].*")" || true
-              echo "$repo-$over-$ver"
-              if [ "$ver" ]; then
-                function version_lt() { test "$(echo "$@" | tr " " "\n" | sort -rV | head -n 1)" != "$1"; }
-                if version_lt "$over" "$ver"; then
-                  latest="$(echo $latest | jq -r '.data.repository.latestRelease.tagCommit.oid' || echo $latest | jq -r '.data.repository.refs.edges[-1].node.target.oid')"
-                  sed -i -e "s/PKG_SOURCE_VERSION:=.*/PKG_SOURCE_VERSION:=$latest/" \
-                         -e "s/PKG_VERSION:=.*/PKG_VERSION:=$ver/" $pkg || true
-                fi || true
-              fi
-            fi
-          fi
-        done
-        touch /tmp/ok
-        ) &
-        
-        (
-        for pkg in $(find -maxdepth 1 -type d -name "luci-*" ! -name "luci-app-dockerman" ! -name "luci-app-store"); do
-          if [ "$(grep "luci.mk" $pkg/Makefile)" ]; then
-            sed -i '/\(PKG_VERSION\|PKG_RELEASE\):=/d' $pkg/Makefile
-          fi
-          grep -q '"nas",' $pkg/luasrc/controller/*.lua && ! grep -q '_("NAS")' $pkg/luasrc/controller/*.lua &&
-            sed -i 's/ index()/ index()\n\tentry({"admin", "nas"}, firstchild(), _("NAS") , 45).dependent = false/' $pkg/luasrc/controller/*.lua
-        done
-        ) &
-
-        (
-        for pkg in $(ls -d */); do
-          if [[ "$(grep "PKG_VERSION" $pkg/Makefile)" && ! "$(grep "PKG_RELEASE" $pkg/Makefile)" ]]; then
-            sed -i "s/\(PKG_VERSION:=.*\)/\1\nPKG_RELEASE:=/" $pkg/Makefile || true
-          fi
-          if [ "$(grep "PKG_RELEASE" $pkg/Makefile)" ]; then
-            sed -i "s/PKG_RELEASE:=.*/PKG_RELEASE:=$(git rev-list --count master $pkg)/" $pkg/Makefile || true
-          fi
-        done
-        touch /tmp/ok2
-        ) &
-
-        (
-        bash .github/diy/create_acl_for_luci.sh -a >/dev/null 2>&1 || true
-        bash .github/diy/convert_translation.sh -a >/dev/null 2>&1 || true
-        mkdir -p luci-app-passwall/root/www/luci-static/passwall
-        cp -rf luci-app-bypass/root/www/luci-static/bypass/* luci-app-passwall/root/www/luci-static/passwall/
-        cp -rf luci-app-bypass/root/usr/share/bypass/GeoLite2-Country.mmdb luci-app-passwall/root/usr/share/passwall/
+        # git clone https://github.com/unifreq/luci-app-oled ./oled
+        # mv ./oled/luci-app-oled ./
+        # rm -rf ./oled
+      
         sed -i '9i\PKG_VERSION:=4.74-3' luci-app-passwall/Makefile
         cp -rf .github/svg/un.svg luci-app-passwall/root/www/luci-static/passwall/flags/
-        ) &
         
-        while [[ ! -f /tmp/ok ||  ! -f /tmp/ok2 ]]; do
-            echo "wait"
-          sleep 1
-        done
 
+        
     - name: Apply
       run: |
         Emoji=("" "🤞" "✨" "🎁" "🎈" "🎄" "🎨" "💋" "🍓" "🍕" "🍉" "💐" "🌴" "🚀" "🛸" "🗽" "⛅" "🌈" "🔥" "⛄" "🐶" "🏅" "🦄" "🐤")
@@ -189,10 +163,5 @@ jobs:
         git add .
         git commit -m "${Emoji[$[$RANDOM % ${#Emoji[@]}]]} Sync $(date +%Y-%m-%d" "%H:%M)"
         git push -f
-
-    - name: Delete workflow runs
-      uses: Mattraks/delete-workflow-runs@main
-      continue-on-error: true
-      with:
-        retain_days: 1
-        keep_minimum_runs: 3
+ 
+              
