@@ -84,6 +84,7 @@ jobs:
         rm -rf $1
         }
         (
+        git_clone https://github.com/kiddin9/openwrt-packages && mvdir openwrt-bypass
         git_clone https://github.com/xiaorouji/openwrt-passwall && mvdir openwrt-passwall
         ) &
         
@@ -163,6 +164,8 @@ jobs:
         mkdir -p luci-app-passwall/root/www/luci-static/passwall
         cp -rf luci-app-bypass/root/www/luci-static/bypass/* luci-app-passwall/root/www/luci-static/passwall/
         cp -rf luci-app-bypass/root/usr/share/bypass/GeoLite2-Country.mmdb luci-app-passwall/root/usr/share/passwall/
+        sed -i '9i\PKG_VERSION:=4.74-3' luci-app-passwall/Makefile
+        cp -rf .github/svg/un.svg luci-app-passwall/root/www/luci-static/passwall/flags/
         ) &
         
         while [[ ! -f /tmp/ok ||  ! -f /tmp/ok2 ]]; do
