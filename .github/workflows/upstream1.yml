@@ -92,7 +92,7 @@ jobs:
         (
         git_clone https://github.com/xiaorouji/openwrt-passwall && mvdir openwrt-passwall
         ) &
-        (
+        
         
 
         if [[ $(ls $ipk/po | wc -l) -gt 3 ]]; then
@@ -149,16 +149,6 @@ jobs:
         done
         touch /tmp/ok
         ) &
-        
-        (
-        for pkg in $(find -maxdepth 1 -type d -name "luci-*" ! -name "luci-app-dockerman" ! -name "luci-app-store"); do
-          if [ "$(grep "luci.mk" $pkg/Makefile)" ]; then
-            sed -i '/\(PKG_VERSION\|PKG_RELEASE\):=/d' $pkg/Makefile
-          fi
-          grep -q '"nas",' $pkg/luasrc/controller/*.lua && ! grep -q '_("NAS")' $pkg/luasrc/controller/*.lua &&
-            sed -i 's/ index()/ index()\n\tentry({"admin", "nas"}, firstchild(), _("NAS") , 45).dependent = false/' $pkg/luasrc/controller/*.lua
-        done
-        ) &
 
         (
         for pkg in $(ls -d */); do
@@ -184,14 +174,7 @@ jobs:
         echo "#page>div[data-v-d324f700]:first-child{display:none}
         button.btn_styles.color1[data-v-0d223b54]:last-child{display:none}" >>luci-app-quickstart/htdocs/luci-static/quickstart/style.css
         
-        sed -i \
-          -e 's?include \.\./\.\./\(lang\|devel\)?include $(TOPDIR)/feeds/packages/\1?' \
-          -e "s/\(\(^\| \|	\)\(PKG_HASH\|PKG_MD5SUM\|PKG_MIRROR_HASH\|HASH\):=\).*/\1skip/" \
-          -e 's?\.\./\.\./luci.mk?$(TOPDIR)/feeds/luci/luci.mk?' \
-          -e 's/+ca-certificates/+ca-bundle/' \
-          -e 's/php7/php8/g' \
-          -e 's/+docker /+docker +dockerd /g' \
-          */Makefile
+        
         ) &
         
         while [[ ! -f /tmp/ok ||  ! -f /tmp/ok2 ]]; do
