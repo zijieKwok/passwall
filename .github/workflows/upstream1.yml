@@ -95,10 +95,10 @@ jobs:
         
         
 
-        if [[ $(ls $ipk/po | wc -l) -gt 3 ]]; then
-        	rm -rf $ipk
-            fi
-        	done
+        
+        	
+            
+        	
         
 
         
