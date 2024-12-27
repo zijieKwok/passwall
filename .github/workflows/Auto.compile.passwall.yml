@@ -97,7 +97,7 @@ jobs:
 
       - name: Cache openwrt SDK
         id: cache-sdk
-        uses: actions/cache@v3
+        uses: actions/cache@v4
         with:
           path: sdk
           key: openwrt-luci-${{ matrix.luci_ver }}-x86_64
@@ -114,11 +114,11 @@ jobs:
           echo "src-git luci https://github.com/openwrt/luci.git;openwrt-${{ matrix.luci_ver }}" >> feeds.conf
           echo "src-git routing https://git.openwrt.org/feed/routing.git;openwrt-${{ matrix.sdk_ver }}"  >> feeds.conf
           echo "src-git passwall_packages https://github.com/${{ env.packages }}.git;main" >> feeds.conf
-          echo "src-git passwall https://github.com/${{ env.passwall }}.git;main" >> feeds.conf
+          echo "src-git passwall https://github.com/${{ env.passwall }}.git;${{ github.ref_name }}" >> feeds.conf
           ./scripts/feeds update -a
           echo "CONFIG_PACKAGE_luci-app-passwall=m" > .config
           ./scripts/feeds install -d n luci-app-passwall
-          make download -j8
+          make package/luci-app-passwall/download -j8
 
       - name: Configure passwall
         run: |
