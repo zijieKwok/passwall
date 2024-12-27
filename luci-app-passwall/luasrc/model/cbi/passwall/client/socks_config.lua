@@ -1,6 +1,6 @@
 local api = require "luci.passwall.api"
 local appname = "passwall"
-local uci = api.uci
+local uci = api.libuci
 local has_singbox = api.finded_com("singbox")
 local has_xray = api.finded_com("xray")
 
@@ -21,9 +21,8 @@ o.default = 1
 o.rmempty = false
 
 local auto_switch_tip
-local current_node_file = string.format("/tmp/etc/%s/id/socks_%s", appname, arg[1])
-local current_node = luci.sys.exec(string.format("[ -f '%s' ] && echo -n $(cat %s)", current_node_file, current_node_file))
-if current_node and current_node ~= "" and current_node ~= "nil" then
+local current_node = api.get_cache_var("socks_" .. arg[1])
+if current_node then
 	local n = uci:get_all(appname, current_node)
 	if n then
 		if tonumber(m:get(arg[1], "enable_autoswitch") or 0) == 1 then
@@ -112,6 +111,12 @@ o:depends("enable_autoswitch", true)
 
 o = s:option(Value, "autoswitch_probe_url", translate("Probe URL"), translate("The URL used to detect the connection status."))
 o.default = "https://www.google.com/generate_204"
+o:value("https://cp.cloudflare.com/", "Cloudflare")
+o:value("https://www.gstatic.com/generate_204", "Gstatic")
+o:value("https://www.google.com/generate_204", "Google")
+o:value("https://www.youtube.com/generate_204", "YouTube")
+o:value("https://connect.rom.miui.com/generate_204", "MIUI (CN)")
+o:value("https://connectivitycheck.platform.hicloud.com/generate_204", "HiCloud (CN)")
 o:depends("enable_autoswitch", true)
 
 for k, v in pairs(nodes_table) do
