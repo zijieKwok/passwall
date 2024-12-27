@@ -39,7 +39,7 @@ jobs:
         rm -rf ./luci-app-bypass
         rm -rf ./luci-app-passwall
         rm -rf ./passwall-packages
-        rm -rf ./lua-maxminddb
+        # rm -rf ./lua-maxminddb
         # rm -rf ./luci-app-openclash
         # rm -rf ./luci-app-passwall2
         # rm -rf ./luci-app-ssr-plus
@@ -76,11 +76,11 @@ jobs:
         # mv ./linkease/istore-ui/app-store-ui ./linkease/luci/
         # rm -rf ./linkease/istore-ui  
 
-        git clone --depth=1 https://github.com/kiddin9/openwrt-packages.git ./maxminddb
-        mv ./maxminddb/lua-maxminddb ./ 
-        rm -rf ./maxminddb
+        # git clone --depth=1 https://github.com/kiddin9/kwrt-packages.git ./maxminddb
+        # mv ./maxminddb/lua-maxminddb ./ 
+        # rm -rf ./maxminddb
        
-        git clone --depth=1 https://github.com/kiddin9/openwrt-packages.git ./pass3
+        git clone --depth=1 https://github.com/kiddin9/kwrt-packages.git ./pass3
         mv ./pass3/luci-app-bypass ./
         rm -rf ./pass3
         
@@ -144,7 +144,7 @@ jobs:
         # mv ./oled/luci-app-oled ./
         # rm -rf ./oled
       
-        sed -i '9i\PKG_VERSION:=4.74-2' luci-app-passwall/Makefile
+        # sed -i '9i\PKG_VERSION:=4.74-2' luci-app-passwall/Makefile
         cp -rf .github/svg/un.svg luci-app-passwall/root/www/luci-static/passwall/flags/
         
 
